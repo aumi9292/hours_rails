@@ -1,0 +1,2 @@
+class DateHoursController < ApplicationController
+end
