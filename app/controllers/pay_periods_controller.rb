@@ -1,3 +1,5 @@
+require 'Date'
+
 class PayPeriodsController < ApplicationController
 
   def index
