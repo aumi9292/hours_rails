@@ -1,11 +1,3 @@
-# This file should contain all the record creation needed to seed the database with its default values.
-# The data can then be loaded with the rails db:seed command (or created alongside the database with db:setup).
-#
-# Examples:
-#
-#   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
-#   Character.create(name: 'Luke', movie: movies.first)
-
 employees = [
   {full_name: 'Austin Miller'}, 
   {full_name: 'Frito Lays'}, 
@@ -38,16 +30,18 @@ seed_data = [
   { model: DateHour, data: date_hours }
 ]
 
-def seed(model, collection)
-  puts "\n#{model.name}s"
-  collection.each do |cl_hash|
-    puts cl_hash
-    model.create(cl_hash)
+def seed(seed_data)
+  puts "\nSeeding Hours Database"
+
+  seed_data.each do |set|
+    puts "\n#{set[:model].name}s"
+    set[:data].each do |dt_hash|
+      puts dt_hash
+      set[:model].create(dt_hash)
+    end
   end
+
+  puts "\nSuccessfully seeded Hours Database\n"
 end
 
-puts "\nSeeding Hours Database"
-
-seed_data.each { |set| seed(set[:model], set[:data]) }
-
-puts "\nSuccessfully seeded Hours Database"
+seed(seed_data)
