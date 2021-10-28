@@ -1,4 +1,7 @@
 class DateHoursController < ApplicationController
+
+  skip_before_action :verify_authenticity_token
+
   def index
     pp_dates = get_all_days_from_pay_period(params[:employee_id], params[:pay_period_id])
 
@@ -9,7 +12,29 @@ class DateHoursController < ApplicationController
     render :json => merge_date_hours_worked_with_pp_days(d_hs, pp_dates)
   end
 
+  def create
+    @date_hour = DateHour.new(date_hours_params)
+    if @date_hour.save
+      redirect_to employee_pay_period_date_hours_path
+    else
+      render :json => {"error": "please ensure date_hour fields are valid and present"}
+    end 
+  end
+
+  def update
+    @date_hour = DateHour.new(date_hours_params)
+    if @date_hour.save
+      redirect_to employee_pay_period_date_hours_path
+    else
+      render :json => {"error": "please ensure date_hour fields are valid and present"}
+    end 
+  end
+
   private
+
+  def date_hours_params
+    params.require(:date_hour).permit(:pay_period_id, :employee_id, :hours, :date, :day)
+  end
 
   def merge_date_hours_worked_with_pp_days(d_hs, pp_dates)
     pp_dates.each { |pp_d| d_hs << pp_d if d_hs.none? { |dt| dt[:date].to_s == pp_d[:date]} }
@@ -27,10 +52,9 @@ class DateHoursController < ApplicationController
     Range.new(pp.start_date.to_s, pp.end_date.to_s)
   end
 
-  def format_date_hour(row, e_id, pp_id, id = nil)
+  def format_date_hour(row, e_id, pp_id )
     d_h = parse_date_hour(row)
-    row
-    d_h.merge({ id: row[:id] || id, employee_id: e_id, pay_period_id: pp_id })
+    d_h.merge({ employee_id: e_id, pay_period_id: pp_id })
   end
 
   def parse_date_hour(d_h)
