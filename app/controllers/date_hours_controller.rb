@@ -13,27 +13,35 @@ class DateHoursController < ApplicationController
   end
 
   def create
-    @date_hour = DateHour.new(date_hours_params)
-    if @date_hour.save
-      redirect_to employee_pay_period_date_hours_path
-    else
-      render :json => {"error": "please ensure date_hour fields are valid and present"}
+    p date_hours_params
+    e_id = date_hours_params.first[:employee_id]
+    pp_id = date_hours_params.first[:pay_period_id]
+    DateHour.transaction do
+      DateHour.create(date_hours_params)
     end 
+    redirect_to "/employees/#{e_id}/pay_periods/#{pp_id}/date_hours"
+    # @date_hour = DateHour.new(date_hours_params)
+    # if @date_hour.save
+    #   redirect_to employee_pay_period_date_hours_path
+    # else
+    #   render :json => {"error": "please ensure date_hour fields are valid and present"}
+    # end 
   end
 
   def update
-    @date_hour = DateHour.new(date_hours_params)
-    if @date_hour.save
-      redirect_to employee_pay_period_date_hours_path
-    else
-      render :json => {"error": "please ensure date_hour fields are valid and present"}
-    end 
+    p date_hours_params
+    # @date_hour = DateHour.new(date_hours_params)
+    # if @date_hour.save
+    #   redirect_to employee_pay_period_date_hours_path
+    # else
+    #   render :json => {"error": "please ensure date_hour fields are valid and present"}
+    # end 
   end
 
   private
 
   def date_hours_params
-    params.require(:date_hour).permit(:pay_period_id, :employee_id, :hours, :date, :day)
+    params.permit(date_hours: [:pay_period_id, :employee_id, :hours, :date, :day]).require(:date_hours)
   end
 
   def merge_date_hours_worked_with_pp_days(d_hs, pp_dates)
