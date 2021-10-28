@@ -13,13 +13,10 @@ class DateHoursController < ApplicationController
   end
 
   def create
-    p date_hours_params
-    e_id = date_hours_params.first[:employee_id]
-    pp_id = date_hours_params.first[:pay_period_id]
     DateHour.transaction do
-      DateHour.create(date_hours_params)
+      @date_hours = DateHour.create(date_hours_params)
     end 
-    redirect_to "/employees/#{e_id}/pay_periods/#{pp_id}/date_hours"
+    render :json => @date_hours
     # @date_hour = DateHour.new(date_hours_params)
     # if @date_hour.save
     #   redirect_to employee_pay_period_date_hours_path
