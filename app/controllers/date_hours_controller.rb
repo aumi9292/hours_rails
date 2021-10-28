@@ -5,34 +5,23 @@ class DateHoursController < ApplicationController
   def index
     pp_dates = get_all_days_from_pay_period(params[:employee_id], params[:pay_period_id])
 
-    d_hs = Employee.find(params[:employee_id])
+    d_hs = Employee
+    .find(params[:employee_id])
     .date_hours
-    .select { |d_h| d_h.pay_period_id == params[:pay_period_id].to_i }
+    .where(pay_period_id: params[:pay_period_id])
 
-    render :json => merge_date_hours_worked_with_pp_days(d_hs, pp_dates)
+    totals = d_hs.sum(:hours)
+
+    #render :json => {date_hours: d_hs, totals: totals} # currently only returning date_hours an employee has worked, not all date_hours in the pay_period
+
+    render :json => {date_hours: merge_date_hours_worked_with_pp_days(d_hs.to_a, pp_dates), totals: totals}
   end
 
   def create
     DateHour.transaction do
       @date_hours = DateHour.create(date_hours_params)
     end 
-    render :json => @date_hours
-    # @date_hour = DateHour.new(date_hours_params)
-    # if @date_hour.save
-    #   redirect_to employee_pay_period_date_hours_path
-    # else
-    #   render :json => {"error": "please ensure date_hour fields are valid and present"}
-    # end 
-  end
-
-  def update
-    p date_hours_params
-    # @date_hour = DateHour.new(date_hours_params)
-    # if @date_hour.save
-    #   redirect_to employee_pay_period_date_hours_path
-    # else
-    #   render :json => {"error": "please ensure date_hour fields are valid and present"}
-    # end 
+    render :json => @date_hours 
   end
 
   private
@@ -44,7 +33,7 @@ class DateHoursController < ApplicationController
   def merge_date_hours_worked_with_pp_days(d_hs, pp_dates)
     pp_dates.each { |pp_d| d_hs << pp_d if d_hs.none? { |dt| dt[:date].to_s == pp_d[:date]} }
     d_hs.sort_by! {|d_h| Date.strptime(d_h[:date].to_s)}
-    {date_hours: d_hs, totals: calculate_hours(d_hs)}
+    d_hs
   end
 
   def get_all_days_from_pay_period(e_id, pp_id)
@@ -66,8 +55,8 @@ class DateHoursController < ApplicationController
     { date: d_h[:date], day: Date.parse(d_h[:date]).strftime('%A'), hours: d_h[:hours] || "0.0000" }
   end
 
-  def calculate_hours(d_hs)
-    total = d_hs.reduce(0) {|total, d_h| total + d_h[:hours].to_i}
-    '%.4f' % total
-  end
+  # def calculate_hours(d_hs)
+  #   total = d_hs.reduce(0) {|total, d_h| total + d_h[:hours].to_f}
+  #   '%.4f' % total
+  # end
 end
