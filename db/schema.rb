@@ -14,7 +14,7 @@ ActiveRecord::Schema.define(version: 2021_10_26_214824) do
 
   create_table "date_hours", force: :cascade do |t|
     t.date "date"
-    t.decimal "hours", precision: 5, scale: 4
+    t.decimal "hours", precision: 5, scale: 4, default: "0.0"
     t.string "day"
     t.integer "employee_id", null: false
     t.integer "pay_period_id", null: false
