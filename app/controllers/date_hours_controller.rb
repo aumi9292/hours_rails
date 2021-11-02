@@ -1,7 +1,5 @@
 class DateHoursController < ApplicationController
 
-  skip_before_action :verify_authenticity_token
-
   def index
     pp_dates = get_all_days_from_pay_period(params[:employee_id], params[:pay_period_id])
 
@@ -31,14 +29,13 @@ class DateHoursController < ApplicationController
         return
       end
     end 
-
     render :json => @date_hours 
   end
 
   private
 
   def date_hours_params
-    p params.permit(date_hours: [:pay_period_id, :employee_id, :hours, :date, :day]).require(:date_hours)
+    params.permit(date_hours: [:pay_period_id, :employee_id, :hours, :date, :day]).require(:date_hours)
   end
 
   def merge_date_hours_worked_with_pp_days(d_hs, pp_dates)
