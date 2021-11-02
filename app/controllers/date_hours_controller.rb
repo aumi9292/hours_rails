@@ -18,23 +18,17 @@ class DateHoursController < ApplicationController
     end
 
     date_hours = merge_date_hours_worked_with_pp_days(d_hs.to_a, pp_dates)
-    render :json => {date_hours: date_hours, totals: totals}
+
+    render :json => { date_hours: date_hours, totals: totals }
   end
 
   def create
     DateHour.transaction do
-      @date_hours = []
-      p date_hours_params.length
-      date_hours_params.each do |d_h|
-        date_hour = DateHour.create(d_h)
-        p date_hour.invalid?
-        if date_hour.invalid?
-
-          p date_hour.errors
-          render :json => date_hour.errors
-          return
-        end
-        @date_hours << date_hour
+      begin
+        @date_hours = DateHour.create!(date_hours_params)
+      rescue ActiveRecord::RecordInvalid => e
+        render :json => { errors: e.message }, status: 406
+        return
       end
     end 
 
