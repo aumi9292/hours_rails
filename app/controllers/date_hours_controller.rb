@@ -3,39 +3,47 @@ class DateHoursController < ApplicationController
   def index
     pp_dates = get_all_days_from_pay_period(params[:employee_id], params[:pay_period_id])
 
-    begin 
-      d_hs = Employee
-      .find(params[:employee_id])
-      .date_hours
-      .where(pay_period_id: params[:pay_period_id])
+    specified_pay_period = PayPeriod.find(params[:pay_period_id])
 
-      totals = d_hs.sum(:hours)
-    rescue ActiveRecord::RecordNotFound
-      d_hs = []
-      totals = "0.0000"
-    end
+    d_hs = Employee
+    .find(params[:employee_id])
+    .date_hours
+    .where(pay_period_id: specified_pay_period.id)
+
+
+    totals = d_hs.sum(:hours)
 
     date_hours = merge_date_hours_worked_with_pp_days(d_hs.to_a, pp_dates)
 
-    render :json => { date_hours: date_hours, totals: totals }
+    render json: { date_hours: date_hours, totals: totals }
   end
 
   def create
+    errors = false
+
     DateHour.transaction do
       begin
         @date_hours = DateHour.create!(date_hours_params)
       rescue ActiveRecord::RecordInvalid => e
-        render :json => { errors: e.message }, status: 406
-        return
+        errors = true
+        @date_hours = { errors: e.message }
+        raise ActiveRecord::Rollback
       end
-    end 
-    render :json => @date_hours 
+    end
+
+    status = errors ? 422 : 200
+    render json: @date_hours, status: status
   end
 
   private
 
   def date_hours_params
-    params.permit(date_hours: [:pay_period_id, :employee_id, :hours, :date, :day]).require(:date_hours)
+    # params.permit(date_hours: [:pay_period_id, :employee_id, :hours, :date, :day]).require(:date_hours) # original, messy
+    # params.require(:date_hours).permit([:pay_period_id, :employee_id, :hours, :date, :day]) # raises undefined method permit for Array
+
+    params.require(:date_hours).map do |p|
+      p.permit(:pay_period_id, :employee_id, :hours, :date, :day)
+    end
   end
 
   def merge_date_hours_worked_with_pp_days(d_hs, pp_dates)
@@ -47,12 +55,8 @@ class DateHoursController < ApplicationController
     pp_dates.map { |date| DateHour.new(date: date, employee_id: e_id, pay_period_id: pp_id) }
   end
 
-  def generate_pp_range(pp_id) 
-    begin
-      pp = PayPeriod.find(pp_id)
-      Range.new(pp.start_date.to_s, pp.end_date.to_s)
-    rescue ActiveRecord::RecordNotFound
-      []
-    end
+  def generate_pp_range(pp_id)
+    pp = PayPeriod.find(pp_id)
+    Range.new(pp.start_date.to_s, pp.end_date.to_s)
   end
 end
