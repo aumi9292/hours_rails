@@ -2,7 +2,7 @@ class DateHour < ApplicationRecord
 
   validates :hours, :numericality => { less_than_or_equal_to: 9.9999, message: "Hours worked for all dates must be less than 10" }
   validates :hours, :numericality => { greater_than: 0, message: "Hours worked for all dates must be greater than 0" }
-  validate :unique_dates_validator
+  validate :unique_dates_validator, on: :create
   validate :date_in_pp_validator
 
   belongs_to :employee

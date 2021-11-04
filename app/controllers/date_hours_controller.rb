@@ -35,6 +35,28 @@ class DateHoursController < ApplicationController
     render json: @date_hours, status: status
   end
 
+  def update
+    # @date_hour = DateHour.find(params[:id])
+    @date_hours = []
+    errors = false
+
+    begin
+      DateHour.transaction do
+        edit_date_hours_params.each do |updated_date_hour|
+          @date_hour = DateHour.find(updated_date_hour[:id])
+          @date_hour.update!(updated_date_hour)
+          @date_hours << @date_hour
+        end
+      end
+    rescue ActiveRecord::RecordInvalid => e
+      errors = true
+      @date_hours = { errors: e.message }
+    end
+
+    status = errors ? 422 : 200
+    render json: @date_hours, status: status
+  end
+
   private
 
   def date_hours_params
@@ -43,6 +65,12 @@ class DateHoursController < ApplicationController
 
     params.require(:date_hours).map do |p|
       p.permit(:pay_period_id, :employee_id, :hours, :date, :day)
+    end
+  end
+
+  def edit_date_hours_params
+    params.require(:date_hours).map do |p|
+      p.permit(:pay_period_id, :employee_id, :hours, :date, :day, :id)
     end
   end
 
