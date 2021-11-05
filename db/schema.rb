@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_26_214824) do
+ActiveRecord::Schema.define(version: 2021_11_05_154754) do
 
   create_table "date_hours", force: :cascade do |t|
     t.date "date"
@@ -30,11 +30,29 @@ ActiveRecord::Schema.define(version: 2021_10_26_214824) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
+  create_table "jwt_deny_list", force: :cascade do |t|
+    t.string "jti", null: false
+    t.datetime "exp", null: false
+    t.index ["jti"], name: "index_jwt_deny_list_on_jti"
+  end
+
   create_table "pay_periods", force: :cascade do |t|
     t.date "start_date"
     t.date "end_date"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.string "email", default: "", null: false
+    t.string "encrypted_password", default: "", null: false
+    t.string "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
   add_foreign_key "date_hours", "employees"
