@@ -11,14 +11,15 @@ class DateHour < ApplicationRecord
   private
 
   def unique_dates_validator
+    employee = Employee.find(employee_id)
     d_h_exists = !!employee.date_hours.find_by(date: self.date)
-    errors.add(:unique_date, "All date/s must only be entered once") if d_h_exists
+    errors.add(:date, "All date/s must only be entered once") if d_h_exists
   end
 
   def date_in_pp_validator
     pay_period = PayPeriod.find(self.pay_period_id)
     date_in_pay_period = self.date.between? pay_period.start_date, pay_period.end_date
-    errors.add(:date_hour_outside_of_pay_period, "All dates must be within pay_period #{pay_period_id}") unless date_in_pay_period
+    errors.add(:date, "All dates must be within pay_period #{pay_period_id}") unless date_in_pay_period
   end
 
 end
