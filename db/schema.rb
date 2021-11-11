@@ -13,9 +13,9 @@
 ActiveRecord::Schema.define(version: 2021_10_26_214824) do
 
   create_table "date_hours", force: :cascade do |t|
-    t.date "date"
+    t.date "date", null: false
     t.decimal "hours", precision: 5, scale: 4, default: "0.0"
-    t.string "day"
+    t.string "day", null: false
     t.integer "employee_id", null: false
     t.integer "pay_period_id", null: false
     t.datetime "created_at", precision: 6, null: false
@@ -25,14 +25,14 @@ ActiveRecord::Schema.define(version: 2021_10_26_214824) do
   end
 
   create_table "employees", force: :cascade do |t|
-    t.string "full_name"
+    t.string "full_name", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "pay_periods", force: :cascade do |t|
-    t.date "start_date"
-    t.date "end_date"
+    t.date "start_date", null: false
+    t.date "end_date", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end

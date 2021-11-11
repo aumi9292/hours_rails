@@ -1,7 +1,7 @@
 employees = [
-  { full_name: 'Austin Miller' }, 
-  { full_name: 'Frito Lays' }, 
-  { full_name: 'Jimmy Johns' }, 
+  { full_name: 'Austin Miller' },
+  { full_name: 'Frito Lays' },
+  { full_name: 'Jimmy Johns' },
   { full_name: 'Lisa Loops' }
 ]
 
@@ -19,9 +19,9 @@ pay_periods = [
 ]
 
 date_hours = [
-  { date: '2021-10-26', hours: 4, employee_id: 1, pay_period_id: 4 },
-  { date: '2021-10-27', hours: 1, employee_id: 2, pay_period_id: 4 },
-  { date: '2021-11-08', hours: 1.5, employee_id: 3, pay_period_id: 5 }
+  { date: '2021-10-26', hours: 4, day: 'Wednesday', employee_id: 1, pay_period_id: 4 },
+  { date: '2021-10-27', hours: 1, day: 'Thursday', employee_id: 2, pay_period_id: 4 },
+  { date: '2021-11-08', hours: 1.5, day: 'Friday', employee_id: 3, pay_period_id: 5 }
 ]
 
 seed_data = [
