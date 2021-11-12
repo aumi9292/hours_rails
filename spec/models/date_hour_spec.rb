@@ -1,20 +1,11 @@
 describe DateHour, type: :model do
-  let(:employee_who_has_worked) { create(:employee, :with_date_hours) }
-  let(:valid_date_hour) do
-    DateHour.new(
-      date: '2021-10-26',
-      hours: 4,
-      day: 'Wednesday',
-      employee: employee_who_has_worked,
-      pay_period: create(:pay_period)
-    )
-  end
+  let(:employee_who_has_worked) { build(:employee, :with_date_hours) }
+  let(:valid_date_hour) { build(:date_hour) }
 
   subject { valid_date_hour }
 
   it 'should have a valid factory' do
-    dh = build(:date_hour)
-    expect(dh.valid?).to eq true
+    expect(valid_date_hour.valid?).to eq true
   end
 
   describe 'validations' do
@@ -27,7 +18,7 @@ describe DateHour, type: :model do
 
   describe 'custom validations' do
     it 'should be in the specified pay_period' do
-      invalid_date_hour = build(:date_hour, date: '2021-10-26')
+      invalid_date_hour = build(:date_hour, date: 100.days.ago )
       expect(invalid_date_hour.valid?).to be false
     end
   end
