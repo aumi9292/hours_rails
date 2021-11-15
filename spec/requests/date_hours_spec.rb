@@ -1,8 +1,24 @@
 describe 'DateHours' do
+  let(:valid_attributes) {
+    {
+      "email": Faker::Internet.email,
+      "password": "1234"
+    }
+  }
+
+  let(:headers) do
+    post users_url, params: { user: valid_attributes }
+    auth_token = JSON.parse(response.body)['auth_token']
+    { 'Authorization' => "Bearer: #{auth_token}" }
+  end
+
   context 'GET /employees/:employee_id/pay_periods/:pay_period_id/date_hours' do
 
     let(:dh) { create(:date_hour) }
-    before { get employee_pay_period_date_hours_path(dh.employee_id, dh.pay_period_id) }
+
+    before do
+      get employee_pay_period_date_hours_path(dh.employee_id, dh.pay_period_id), headers: headers
+    end
 
     it 'should return a successful response' do
       expect(response).to be_successful
@@ -66,7 +82,9 @@ describe 'DateHours' do
 
       context 'for a well-formed request' do
 
-        before { post date_hours_path, params: params }
+        before do
+          post date_hours_path, params: params, headers: headers
+        end
 
         it 'should return a successful response' do
           expect(response).to be_successful
@@ -85,7 +103,7 @@ describe 'DateHours' do
 
         it 'should return a 422 if the employee does not exist' do
           params[:date_hours].first[:employee_id] = 0
-          post date_hours_path, params: params
+          post date_hours_path, params: params, headers: headers
           expect(response.status).to eq 422
         end
 
@@ -93,20 +111,20 @@ describe 'DateHours' do
         it 'should return a 422 if the pay period does not exist' do
           skip
           params[:date_hours].first[:pay_period_id] = 0
-          post date_hours_path, params: params
+          post date_hours_path, params: params, headers: headers
           expect(response.status).to eq 422
         end
 
         it 'should not allow >= 9.9999 hours' do
           params[:date_hours].first[:hours] = 10
-          post date_hours_path, params: params
+          post date_hours_path, params: params, headers: headers
           expect(response.status).to eq 422
           expect(JSON.parse(response.body)['errors']).to eq "Validation failed: Hours must be less than or equal to 9.9999"
         end
 
         it 'should not allow <= 0 hours' do
           params[:date_hours].first[:hours] = -1
-          post date_hours_path, params: params
+          post date_hours_path, params: params, headers: headers
           expect(response.status).to eq 422
           expect(JSON.parse(response.body)['errors']).to eq "Validation failed: Hours must be greater than 0"
         end
@@ -137,7 +155,9 @@ describe 'DateHours' do
         }
       end
 
-      before { post date_hours_path, params: params }
+      before do
+        post date_hours_path, params: params, headers: headers
+      end
 
       it 'should return a successful response' do
         expect(response).to be_successful
