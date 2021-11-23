@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
   skip_before_action :authenticate_request!, only: [:create, :login]
-  before_action :set_user, only: %i[ show edit update destroy ]
+  before_action :set_user, only: [:show, :edit, :update, :destroy]
 
   def login
     user = User.find_by(email: user_params[:email].to_s.downcase)

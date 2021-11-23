@@ -45,6 +45,7 @@ class DateHoursController < ApplicationController
         edit_date_hours_params.each do |updated_date_hour|
           @date_hour = DateHour.find(updated_date_hour[:id])
           @date_hour.update!(updated_date_hour)
+          p @date_hour
           @date_hours << @date_hour
         end
       end
@@ -85,6 +86,6 @@ class DateHoursController < ApplicationController
 
   def generate_pp_range(pp_id)
     pp = PayPeriod.find(pp_id)
-    Range.new(pp.start_date.to_s, pp.end_date.to_s)
+    Range.new(pp.start_date, pp.end_date)
   end
 end

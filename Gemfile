@@ -40,7 +40,7 @@ group :development, :test do
   gem 'factory_bot_rails'
   gem 'faker'
   gem 'annotate'
-
+  gem 'simplecov'
 end
 
 group :development do

@@ -3,7 +3,6 @@ class ApplicationController < ActionController::API
   include ActionController::MimeResponds
 
   before_action :authenticate_request!
-  before_action :set_user, only: %i[ show edit update destroy ]
 
   protected
 

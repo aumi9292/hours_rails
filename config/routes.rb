@@ -13,5 +13,5 @@ Rails.application.routes.draw do
 
   resources :date_hours, only: [:create]
 
-  put '/date_hours', to: 'date_hours#update'
+  put '/date_hours', to: 'date_hours#update', as: 'update_hours'
 end

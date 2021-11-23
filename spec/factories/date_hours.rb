@@ -1,9 +1,5 @@
 FactoryBot.define do
   factory :date_hour do
-
-    # sequence(:date) do |i|
-    #   p i.days.from_now
-    # end
     date { Date.today }
     day { date.strftime('%A') }
     hours { 8 }

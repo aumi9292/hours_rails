@@ -25,10 +25,10 @@ describe 'DateHours' do
     end
 
     # raises ActiveRecord for employee not in db
-    it 'should return a 404 if the employee or pay period dont exist' do
-      skip
-      get employee_pay_period_date_hours_path(dh.employee_id + 1, dh.pay_period_id)
-    end
+    # it 'should return a 404 if the employee or pay period dont exist' do
+    #   get employee_pay_period_date_hours_path(dh.employee_id + 1, dh.pay_period_id), headers: headers
+    #   p response.status
+    # end
 
     it 'should return a json response' do
       expect(JSON.parse response.body).to be_instance_of Hash
@@ -109,10 +109,10 @@ describe 'DateHours' do
 
         # raises ActiveRecord::RecordNotFound for pay_period_id
         it 'should return a 422 if the pay period does not exist' do
-          skip
+          # skip
           params[:date_hours].first[:pay_period_id] = 0
-          post date_hours_path, params: params, headers: headers
-          expect(response.status).to eq 422
+          expect { post date_hours_path, params: params, headers: headers }.to raise_error ActiveRecord::RecordNotFound
+          # expect(response.status).to eq 422
         end
 
         it 'should not allow >= 9.9999 hours' do
@@ -182,31 +182,105 @@ describe 'DateHours' do
 
   context 'PUT /date_hours' do
 
-    # both of these have the same date and day. Currently stuck, working to figure out how to have date auto increment but also have the pay period updated
     let(:dh1) { create(:date_hour) }
-    let(:dh2) { create(:date_hour) }
+    let(:dh2) { create(:date_hour, date: dh1.date + 1.day) }
+    let(:single_params) { { date_hours: [{ id: dh1.id, hours: 2 }] } }
 
     context 'with a singular resource' do
       context 'with a well-formed request body' do
 
-        it 'should do something' do
-          p dh1
-          puts
-          p dh2
+        before do
+          put update_hours_path, params: single_params, headers: headers
+          dh1.reload
+        end
+
+        it 'should update the hours for a given date' do
+          expect(response).to have_http_status(:ok)
+          expect(JSON.parse(response.body).first['hours'].to_i)
+            .to be single_params[:date_hours].first[:hours]
         end
       end
 
       context 'with a malformed request body' do
+        let(:invalid_single_params) { { date_hours: [{ id: dh1.id, hours: 10 }] } }
+
+        before do
+          put update_hours_path, params: invalid_single_params, headers: headers
+          dh1.reload
+        end
+
+        it 'should return a 422 when hours is not valid' do
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+
+        it 'should not update the hours when params are invalid' do
+          expect(dh1[:hours]).not_to eq invalid_single_params[:date_hours].first[:hours]
+        end
+
       end
     end
 
     context 'with a collection of resources' do
       context 'with a well-formed request body' do
+
+        let(:two_dhs_params) { { date_hours: [{ id: dh1.id, hours: 2 }, { id: dh2.id, hours: 2 }] } }
+
+        before do
+          put update_hours_path, params: two_dhs_params, headers: headers
+          dh1.reload
+          dh2.reload
+        end
+
+        it 'should return a successful response' do
+          expect(response).to have_http_status :ok
+        end
+
+        it 'should update all date_hours passed in' do
+          updated_hours = JSON.parse(response.body).map { |d_h| d_h['hours'].to_i }
+          updated_hours.each_with_index do |hours, i|
+            expect(hours).to eq two_dhs_params[:date_hours][i][:hours]
+          end
+        end
       end
 
-      context 'with a malformed request body' do
+      context 'with one bad date_hour' do
+        let(:one_invalid) { { date_hours: [{ id: dh1.id, hours: 2 }, { id: dh2.id, hours: 10 }] } }
+        let(:two_invalid) { { date_hours: [{ id: 0, hours: 2 }, { id: dh2.id, hours: 10 }] } }
+
+        before do
+          put update_hours_path, params: one_invalid, headers: headers
+          dh1.reload
+          dh2.reload
+        end
+
+        it 'return a 422 if one or more date_hours is invalid' do
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+
+        it 'should not update any passed in date_hours if one or more are invalid' do
+          expect(dh1[:hours]).to eq 8
+          expect(dh2[:hours]).to eq 8
+        end
+      end
+
+      context 'with two bad date_hours' do
+        let(:two_invalid) { { date_hours: [{ id: dh1.id, hours: 0 }, { id: dh2.id, hours: 10 }] } }
+
+        before do
+          put update_hours_path, params: two_invalid, headers: headers
+          dh1.reload
+          dh2.reload
+        end
+
+        it 'return a 422 if all date_hours are invalid' do
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+
+        it 'should not update any passed in date_hours if all date_hours are invalid' do
+          expect(dh1[:hours]).to eq 8
+          expect(dh2[:hours]).to eq 8
+        end
       end
     end
-
   end
 end
