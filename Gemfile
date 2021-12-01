@@ -27,6 +27,9 @@ gem 'rack-cors'
 
 gem 'date'
 
+# authorization
+gem 'cancancan'
+
 # Use Active Storage variant
 # gem 'image_processing', '~> 1.2'
 
